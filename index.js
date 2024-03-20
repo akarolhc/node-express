@@ -6,15 +6,17 @@ app.use(express.json());
 // CRUD USUÁRIOS
 const usuarios = [];
 
-app.get("/", (req, res) => { 
+app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.get("/usuario", (req, res) => { // get para pegar as informações
+app.get("/usuario", (req, res) => {
+  // get para pegar as informações
   res.json(usuarios);
 });
 
-app.post("/usuario", (req, res) => {  // post para inserir informações
+app.post("/usuario", (req, res) => {
+  // post para inserir informações
   const { nome, email } = req.body;
 
   let id = 0;
@@ -35,8 +37,9 @@ app.post("/usuario", (req, res) => {  // post para inserir informações
   res.status(201).json(usuario);
 });
 
-app.put("/usuario/:id", (req, res) => { // put para modificar as informações
-  const { id } = req.params; 
+app.put("/usuario/:id", (req, res) => {
+  // put para modificar as informações
+  const { id } = req.params;
   const { nome, email } = req.body;
 
   const index = usuarios.findIndex((u) => u.id === Number(id));
@@ -54,7 +57,8 @@ app.put("/usuario/:id", (req, res) => { // put para modificar as informações
   res.status(200).json(usuarios[index]);
 });
 
-app.delete("/usuario/:id", (req, res) => { // delete para deletar as informações
+app.delete("/usuario/:id", (req, res) => {
+  // delete para deletar as informações
   const { id } = req.params;
 
   const index = usuarios.findIndex((u) => u.id === Number(id));
@@ -78,39 +82,46 @@ app.get("/postagens", (req, res) => {
 });
 
 app.post("/postagens", (req, res) => {
-  const { nome, email } = req.body;
-});
-let id = 0;
+  const { titulo, conteudo, autorId } = req.body;
 
-for (const postagem of postagens) {
-  if (postagem.id > id) {
-    id = postagem.id;
+  const autor = usuarios.find((u) => u.id === autorId);
+  if (!autor) {
+    return res.status(404).json({ error: "Autor não encontrado" });
   }
 
-  const postagens = {
+  let id = 0;
+
+  for (const postagem of postagens) {
+    if (postagem.id > id) {
+      id = postagem.id;
+    }
+  }
+
+  const postagem = {
     id: id + 1,
-    nome,
-    email,
+    titulo,
+    conteudo,
+    autorId,
   };
   postagens.push(postagem);
 
   res.status(201).json(postagem);
-}
-
+});
 app.put("/postagens/:id", (req, res) => {
   const { id } = req.params;
-  const { nome, email } = req.body;
+  const { titulo, conteudo, autorId } = req.body;
 
-  const index = postagens.findIndex((u) => u.id === Number(id));
+  const index = postagens.findIndex(postagens => postagens.id === Number(id));
 
   if (index === -1) {
-    return res.status(404).json({ error: "Usuário não encontrado" });
+    return res.status(404).json({ error: "Postagem não encontrada" });
   }
 
   postagens[index] = {
     id: Number(id),
-    nome,
-    email,
+    titulo,
+    conteudo,
+    autorId
   };
 
   res.status(200).json(postagens[index]);
@@ -139,7 +150,7 @@ app.get("/postagens/autor/:id", (req, res) => {
 
   if (postagensIndex === -1) {
     res.status(404).json({ error: "Postagem not found" });
-    return;  
+    return;
   } // se o id procurado não for retornado da maneira correta, retorna uma mensagem de erro
 
   res.status(200).json(postagens[postagensIndex]);
